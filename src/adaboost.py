@@ -2,47 +2,46 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
-import numpy as np
 
 # Citirea și preprocesarea datelor
 def load_and_preprocess_data(file_path, is_classification=True):
-    tourism_data = pd.read_csv(file_path)
+    data = pd.read_csv(file_path)
 
     # Preprocesarea datelor
     encoder = LabelEncoder()
-    tourism_data['Category'] = encoder.fit_transform(tourism_data['Category'])
-    tourism_data['Accommodation_Available'] = encoder.fit_transform(tourism_data['Accommodation_Available'])
+    data['Category'] = encoder.fit_transform(data['Category'])
+    data['Accommodation_Available'] = encoder.fit_transform(data['Accommodation_Available'])
 
     if is_classification:
         bins = [0, 50000, 200000, float('inf')]
         labels = ['Low', 'Medium', 'High']
-        tourism_data['Revenue_Category'] = pd.cut(tourism_data['Revenue'], bins=bins, labels=labels, right=False)
-        y = tourism_data['Revenue_Category']
+        data['Revenue_Category'] = pd.cut(data['Revenue'], bins=bins, labels=labels, right=False)
+        y = data['Revenue_Category']
     else:
-        y = tourism_data['Revenue']
+        y = data['Revenue']
 
-    X = tourism_data[['Visitors', 'Rating', 'Accommodation_Available']]
+    X = data[['Visitors', 'Rating', 'Accommodation_Available']]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
 
-    return X_train, X_test, y_train, y_test, tourism_data
+    return x_train, x_test, y_train, y_test, data
 
-# Antrenarea modelului kNN
-def train_knn(X_train, X_test, y_train, y_test, k=5, is_classification=True):
+
+# Antrenarea modelului AdaBoost
+def train_adaboost(x_train, x_test, y_train, y_test, is_classification=True, n_estimators=50):
     if is_classification:
-        model = KNeighborsClassifier(n_neighbors=k)
+        model = AdaBoostClassifier(n_estimators=n_estimators, algorithm='SAMME', random_state=42)
     else:
-        model = KNeighborsRegressor(n_neighbors=k)
+        model = AdaBoostRegressor(n_estimators=n_estimators, random_state=42)
 
-    model.fit(X_train, y_train)
-
-    predictions = model.predict(X_test)
+    model.fit(x_train, y_train)
+    predictions = model.predict(x_test)
 
     if is_classification:
         accuracy = accuracy_score(y_test, predictions)
@@ -55,8 +54,9 @@ def train_knn(X_train, X_test, y_train, y_test, k=5, is_classification=True):
 
     return model, predictions
 
+
 # Vizualizarea predicțiilor
-def visualize_predictions(y_test, predictions, is_classification=True, file_name='knn_predictions.png'):
+def visualize_predictions(y_test, predictions, is_classification=True, file_name='adaboost_predictions.png'):
     plt.figure(figsize=(12, 8))
     if is_classification:
         plt.scatter(range(len(y_test)), y_test, label='Valori reale', alpha=0.7, color='blue', marker='o')
@@ -72,7 +72,7 @@ def visualize_predictions(y_test, predictions, is_classification=True, file_name
     plt.legend(fontsize=12)
     plt.grid(alpha=0.5)
 
-    # Exportarea graficului în PNG
+    # Exportăm graficul în PNG
     plt.savefig(file_name, dpi=300, bbox_inches='tight')
     plt.show()
 
@@ -84,11 +84,10 @@ if __name__ == "__main__":
     classification = True  # Schimbă în False pentru regresie
 
     X_train, X_test, Y_train, Y_test, tourism_data = load_and_preprocess_data(dataset_path, classification)
-    k = 5  # Numărul de vecini
-    knn_model, predictions = train_knn(X_train, X_test, Y_train, Y_test, k, classification)
 
-    # Vizualizarea datelor originale
-    #visualize_data(tourism_data, classification)
+    # Parametri AdaBoost
+    n_estimators = 100  # Numărul de estimatori bazați
+    adaboost_model, predictions = train_adaboost(X_train, X_test, Y_train, Y_test, classification, n_estimators)
 
     # Vizualizarea predicțiilor
-    visualize_predictions(Y_test, predictions, classification)
+    visualize_predictions(Y_test, predictions, classification, file_name='adaboost_predictions.png')
