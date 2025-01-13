@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
 import numpy as np
+import os
 
 # Citirea și preprocesarea datelor
 def load_and_preprocess_data(file_path, is_classification=True):
@@ -76,6 +77,19 @@ def visualize_predictions(y_test, predictions, is_classification=True, file_name
     plt.savefig(file_name, dpi=300, bbox_inches='tight')
     plt.show()
 
+# Salvarea rezultatelor evaluării într-un fișier CSV pentru comparație
+def save_evaluation_results(results, output_file='evaluation_results.csv'):
+    if os.path.exists(output_file):
+        # Dacă fișierul există deja, citim datele existente și adăugăm noi rezultate
+        existing_results = pd.read_csv(output_file)
+        results_df = pd.DataFrame(results)
+        updated_results = pd.concat([existing_results, results_df], ignore_index=True)
+        updated_results.to_csv(output_file, index=False)
+    else:
+        # Dacă fișierul nu există, creăm unul nou cu noile rezultate
+        results_df = pd.DataFrame(results)
+        results_df.to_csv(output_file, index=False)
+
 
 if __name__ == "__main__":
     dataset_path = 'data/tourism_dataset.csv'
@@ -87,8 +101,17 @@ if __name__ == "__main__":
     k = 5  # Numărul de vecini
     knn_model, predictions = train_knn(X_train, X_test, Y_train, Y_test, k, classification)
 
-    # Vizualizarea datelor originale
-    #visualize_data(tourism_data, classification)
+    # Salvarea rezultatelor pentru kNN într-un fișier CSV
+    evaluation_results = []
+    if classification:
+        accuracy = accuracy_score(Y_test, predictions)
+        evaluation_results.append({'Algorithm': 'kNN Classification', 'Accuracy': accuracy})
+    else:
+        mse = mean_squared_error(Y_test, predictions)
+        r2 = r2_score(Y_test, predictions)
+        evaluation_results.append({'Algorithm': 'kNN Regression', 'MSE': mse, 'R2 Score': r2})
+
+    save_evaluation_results(evaluation_results)
 
     # Vizualizarea predicțiilor
     visualize_predictions(Y_test, predictions, classification)

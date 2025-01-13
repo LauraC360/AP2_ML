@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+import os
 
 # Citirea și preprocesarea datelor
 def load_and_preprocess_data(file_path, is_classification=True):
@@ -46,13 +47,13 @@ def train_adaboost(x_train, x_test, y_train, y_test, is_classification=True, n_e
     if is_classification:
         accuracy = accuracy_score(y_test, predictions)
         print(f'Accuracy: {accuracy}')
+        return model, accuracy
     else:
         mse = mean_squared_error(y_test, predictions)
         r2 = r2_score(y_test, predictions)
         print(f'Mean Squared Error: {mse}')
         print(f'R2 Score: {r2}')
-
-    return model, predictions
+        return model, mse, r2
 
 
 # Vizualizarea predicțiilor
@@ -77,6 +78,20 @@ def visualize_predictions(y_test, predictions, is_classification=True, file_name
     plt.show()
 
 
+# Salvarea rezultatelor evaluării într-un fișier CSV existent
+def save_evaluation_results(results, output_file='evaluation_results.csv'):
+    if os.path.exists(output_file):
+        # Dacă fișierul există deja, citim datele existente și adăugăm noi rezultate
+        existing_results = pd.read_csv(output_file)
+        results_df = pd.DataFrame(results)
+        updated_results = pd.concat([existing_results, results_df], ignore_index=True)
+        updated_results.to_csv(output_file, index=False)
+    else:
+        # Dacă fișierul nu există, creăm unul nou cu noile rezultate
+        results_df = pd.DataFrame(results)
+        results_df.to_csv(output_file, index=False)
+
+
 if __name__ == "__main__":
     dataset_path = 'data/tourism_dataset.csv'
 
@@ -87,7 +102,15 @@ if __name__ == "__main__":
 
     # Parametri AdaBoost
     n_estimators = 100  # Numărul de estimatori bazați
-    adaboost_model, predictions = train_adaboost(X_train, X_test, Y_train, Y_test, classification, n_estimators)
+    if classification:
+        adaboost_model, accuracy = train_adaboost(X_train, X_test, Y_train, Y_test, classification, n_estimators)
+        evaluation_results = [{'Algorithm': 'AdaBoost', 'Accuracy': accuracy}]
+    else:
+        adaboost_model, mse, r2 = train_adaboost(X_train, X_test, Y_train, Y_test, classification=False, n_estimators=n_estimators)
+        evaluation_results = [{'Algorithm': 'AdaBoost', 'Mean Squared Error': mse, 'R2 Score': r2}]
+
+    # Salvarea rezultatelor într-un fișier CSV
+    save_evaluation_results(evaluation_results)
 
     # Vizualizarea predicțiilor
-    visualize_predictions(Y_test, predictions, classification, file_name='adaboost_predictions.png')
+    visualize_predictions(Y_test, adaboost_model.predict(X_test), classification, file_name='adaboost_predictions.png')
