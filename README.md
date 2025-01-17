@@ -9,7 +9,7 @@ Acest proiect are ca scop studierea adaptării și adecvării diferiților algor
 
 ## Analiza Setului de Date
 
-În cadrul acestui studiu, am analizat un set de date disponibil la adresa specificată, care descrie informații turistice relevante, incluzând următoarele atribute: \textbf{Location}, \textbf{Country}, \textbf{Category}, \textbf{Visitors}, \textbf{Rating}, \textbf{Revenue}, și \textbf{Accommodation\_Available}. Scopul principal este de a propune o soluție bazată pe algoritmi de Învățare Automată, care să determine o ierarhie optimă a categoriilor de activități tematice (ex.: \textit{Nature, Historical, Cultural} etc.) ce maximizează profitul (\textbf{Revenue}) și/sau profitul per vizitator (\textbf{Revenue/Visitors}) pentru o anumită țară.
+În cadrul acestui studiu, am analizat un set de date disponibil la adresa specificată, care descrie informații turistice relevante, incluzând următoarele atribute: **Location**, **Country**, **Category**, **Visitors**, **Rating**, **Revenue**, și **Accommodation_Available**. Scopul principal este de a propune o soluție bazată pe algoritmi de Învățare Automată, care să determine o ierarhie optimă a categoriilor de activități tematice (ex.: *Nature, Historical, Cultural* etc.) ce maximizează profitul (**Revenue**) și/sau profitul per vizitator (**Revenue/Visitors**) pentru o anumită țară.
 
 ## Metodologie
 
