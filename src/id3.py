@@ -18,24 +18,24 @@ def load_and_preprocess_data(file_path):
     tourism_data['Accommodation_Available'] = encoder.fit_transform(
         tourism_data['Accommodation_Available'])  # Convertim 'Accommodation_Available'
 
-    # Discretizăm venitul în 3 categorii
+    # Discretizarea venitului în 3 categorii
     bins = [0, 50000, 200000, float('inf')]  # Praguri pentru categorii
     labels = ['Low', 'Medium', 'High']
     tourism_data['Revenue_Category'] = pd.cut(tourism_data['Revenue'], bins=bins, labels=labels, right=False)
 
-    # Selectăm caracteristicile (features) și ținta (target)
+    # Selectarea caracteristicilor și țintei
     X = tourism_data[['Visitors', 'Rating', 'Accommodation_Available']]  # Caracteristici de intrare
     y = tourism_data['Revenue_Category']  # Variabila discretizată de predicție (Revenue_Category)
 
-    # Împărțim datele în seturi de antrenament și testare (80%-20%)
+    # Împărțirea datelor în seturi de antrenament și testare (80%-20%)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     return X_train, X_test, y_train, y_test, encoder
 
 
-# Antrenarea modelului ID3 (cu opțiuni îmbunătățite)
+# Antrenarea modelului ID3
 def train_decision_tree(x_train, x_test, y_train, y_test, criterion='entropy'):
-    # Creăm și antrenăm modelul ID3 (folosind entropia ca criteriu)
+    # Crearea și antrenarea modelului ID3 (folosind entropia ca criteriu)
     model = DecisionTreeClassifier(criterion=criterion, random_state=42)
     model.fit(x_train, y_train)
 
@@ -48,19 +48,6 @@ def train_decision_tree(x_train, x_test, y_train, y_test, criterion='entropy'):
 
     return model, accuracy
 
-
-# Vizualizarea arborelui de decizie
-def plot_decision_tree(dt_model, x, file_name="id3_tree.png"):
-    # Vizualizarea arborelui de decizie folosind plot_tree
-    plt.figure(figsize=(20, 10))
-    plot_tree(dt_model, filled=True, feature_names=x.columns, class_names=dt_model.classes_, rounded=True, fontsize=12)
-    plt.title('Arbore de decizie ID3')
-
-    # Salvare imagine într-un fișier PNG
-    plt.savefig(file_name, format='png')
-    plt.close()  # Închidem figura pentru a elibera memoria
-
-
 # Salvarea rezultatelor evaluării într-un fișier CSV pentru comparație
 def save_evaluation_results(results, output_file='evaluation_results.csv'):
     if os.path.exists(output_file):
@@ -70,7 +57,7 @@ def save_evaluation_results(results, output_file='evaluation_results.csv'):
         updated_results = pd.concat([existing_results, results_df], ignore_index=True)
         updated_results.to_csv(output_file, index=False)
     else:
-        # Dacă fișierul nu există, creăm unul nou cu noile rezultate
+        # Dacă fișierul nu există, se creează unul nou cu noile rezultate
         results_df = pd.DataFrame(results)
         results_df.to_csv(output_file, index=False)
 
@@ -87,6 +74,3 @@ if __name__ == "__main__":
         {'Algorithm': 'ID3', 'Accuracy': id3_accuracy}
     ]
     save_evaluation_results(evaluation_results)
-
-    # Vizualizare arbore de decizie ID3
-    plot_decision_tree(id3_model, X_train, "id3_tree.png")

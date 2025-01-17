@@ -15,6 +15,7 @@ def load_and_preprocess_data(file_path, is_classification=True):
     data['Category'] = encoder.fit_transform(data['Category'])
     data['Accommodation_Available'] = encoder.fit_transform(data['Accommodation_Available'])
 
+    # Discretizarea venitului în 3 categorii
     if is_classification:
         bins = [0, 50000, 200000, float('inf')]
         labels = ['Low', 'Medium', 'High']
@@ -23,6 +24,7 @@ def load_and_preprocess_data(file_path, is_classification=True):
     else:
         y = data['Revenue']
 
+    # Selectarea caracteristicilor (features) și a țintei (target)
     X = data[['Visitors', 'Rating', 'Accommodation_Available']]
 
     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -44,6 +46,7 @@ def train_adaboost(x_train, x_test, y_train, y_test, is_classification=True, n_e
     model.fit(x_train, y_train)
     predictions = model.predict(x_test)
 
+    # Evaluare model cu metricile Model Accuracy, Mean Squared Error și R2 Score
     if is_classification:
         accuracy = accuracy_score(y_test, predictions)
         print(f'Accuracy: {accuracy}')
@@ -73,7 +76,7 @@ def visualize_predictions(y_test, predictions, is_classification=True, file_name
     plt.legend(fontsize=12)
     plt.grid(alpha=0.5)
 
-    # Exportăm graficul în PNG
+    # Exportarea graficului în PNG
     plt.savefig(file_name, dpi=300, bbox_inches='tight')
     plt.show()
 
@@ -81,27 +84,26 @@ def visualize_predictions(y_test, predictions, is_classification=True, file_name
 # Salvarea rezultatelor evaluării într-un fișier CSV existent
 def save_evaluation_results(results, output_file='evaluation_results.csv'):
     if os.path.exists(output_file):
-        # Dacă fișierul există deja, citim datele existente și adăugăm noi rezultate
+        # Dacă fișierul există deja, se adaugă datele existente și se adaugă noile rezultate
         existing_results = pd.read_csv(output_file)
         results_df = pd.DataFrame(results)
         updated_results = pd.concat([existing_results, results_df], ignore_index=True)
         updated_results.to_csv(output_file, index=False)
     else:
-        # Dacă fișierul nu există, creăm unul nou cu noile rezultate
+        # Dacă fișierul nu există - creara unuia nou cu rezultatele actuale
         results_df = pd.DataFrame(results)
         results_df.to_csv(output_file, index=False)
-
 
 if __name__ == "__main__":
     dataset_path = 'data/tourism_dataset.csv'
 
     # Clasificare sau regresie
-    classification = True  # Schimbă în False pentru regresie
+    classification = True
 
     X_train, X_test, Y_train, Y_test, tourism_data = load_and_preprocess_data(dataset_path, classification)
 
     # Parametri AdaBoost
-    n_estimators = 100  # Numărul de estimatori bazați
+    n_estimators = 100  # Numărul de estimatori
     if classification:
         adaboost_model, accuracy = train_adaboost(X_train, X_test, Y_train, Y_test, classification, n_estimators)
         evaluation_results = [{'Algorithm': 'AdaBoost', 'Accuracy': accuracy}]

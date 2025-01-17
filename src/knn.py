@@ -16,6 +16,7 @@ def load_and_preprocess_data(file_path, is_classification=True):
     tourism_data['Category'] = encoder.fit_transform(tourism_data['Category'])
     tourism_data['Accommodation_Available'] = encoder.fit_transform(tourism_data['Accommodation_Available'])
 
+    # Discretizarea venitului în 3 categorii
     if is_classification:
         bins = [0, 50000, 200000, float('inf')]
         labels = ['Low', 'Medium', 'High']
@@ -111,6 +112,7 @@ if __name__ == "__main__":
         r2 = r2_score(Y_test, predictions)
         evaluation_results.append({'Algorithm': 'kNN Regression', 'MSE': mse, 'R2 Score': r2})
 
+    # Salvarea rezultatelor de evaluare într fișierul CSV
     save_evaluation_results(evaluation_results)
 
     # Vizualizarea predicțiilor
