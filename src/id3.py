@@ -46,7 +46,22 @@ def train_decision_tree(x_train, x_test, y_train, y_test, criterion='entropy'):
     accuracy = accuracy_score(y_test, predictions)
     print(f'Accuracy: {accuracy}')
 
-    return model, accuracy
+    return model, predictions, accuracy
+
+# Vizualizarea predicțiilor
+def visualize_predictions(y_test, predictions, file_name='id3_predictions.png'):
+    plt.figure(figsize=(12, 8))
+    plt.scatter(range(len(y_test)), y_test, label='Valori reale', alpha=0.7, color='blue', marker='o')
+    plt.scatter(range(len(predictions)), predictions, label='Predicții', alpha=0.7, color='orange', marker='x')
+    plt.title('Compararea valorilor reale și a predicțiilor (ID3)', fontsize=16)
+    plt.xlabel('Index', fontsize=14)
+    plt.ylabel('Valoare', fontsize=14)
+    plt.legend(fontsize=12)
+    plt.grid(alpha=0.5)
+
+    # Exportarea graficului în PNG
+    plt.savefig(file_name, dpi=300, bbox_inches='tight')
+    plt.show()
 
 # Salvarea rezultatelor evaluării într-un fișier CSV pentru comparație
 def save_evaluation_results(results, output_file='evaluation_results.csv'):
@@ -67,10 +82,13 @@ if __name__ == "__main__":
     X_train, X_test, Y_train, Y_test, data_encoder = load_and_preprocess_data(dataset_path)
 
     # Antrenare și evaluare ID3
-    id3_model, id3_accuracy = train_decision_tree(X_train, X_test, Y_train, Y_test, criterion='entropy')
+    id3_model, id3_predictions, id3_accuracy = train_decision_tree(X_train, X_test, Y_train, Y_test, criterion='entropy')
 
     # Salvarea rezultatelor într-un fișier CSV
     evaluation_results = [
         {'Algorithm': 'ID3', 'Accuracy': id3_accuracy}
     ]
     save_evaluation_results(evaluation_results)
+
+    # Vizualizarea predicțiilor
+    visualize_predictions(Y_test, id3_predictions)
